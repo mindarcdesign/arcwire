@@ -410,8 +410,10 @@
   .mode-tag { color: var(--accent); }
 
   /* SECTION NAVIGATION */
+  /* foundations shows by default until JS restores saved section */
   .section { display: none; }
   .section.active { display: block; }
+  #section-foundations { display: block; } /* fallback pre-JS */
 
   /* Stats bar */
   .stats-bar {
@@ -1576,18 +1578,87 @@ customElements.<span class="fn">define</span>(<span class="str">'pdp-buy-section
 </div>
 
 <script>
-  // Track all checkboxes
+  const STORAGE_KEY = 'arcwire-checklist-v1';
+  const SECTION_KEY = 'arcwire-section-v1';
+
+  // Give every check-item a stable ID based on its title text
+  function getItemId(el) {
+    const title = el.querySelector('.check-title');
+    return title ? title.textContent.trim().replace(/\s+/g, '-').toLowerCase().slice(0, 60) : null;
+  }
+
+  // Load saved state from localStorage
+  function loadState() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // Save state to localStorage
+  function saveState() {
+    const state = {};
+    document.querySelectorAll('.check-item').forEach(el => {
+      const id = getItemId(el);
+      if (id) state[id] = el.classList.contains('checked');
+    });
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  // Restore checked states on page load
+  function restoreChecks() {
+    const state = loadState();
+    document.querySelectorAll('.check-item').forEach(el => {
+      const id = getItemId(el);
+      if (id && state[id] === true) {
+        el.classList.add('checked');
+      }
+    });
+  }
+
+  // Restore active section on page load
+  function restoreSection() {
+    const saved = localStorage.getItem(SECTION_KEY) || 'foundations';
+    // Find the nav item that matches and activate it
+    const navItems = document.querySelectorAll('.nav-item[onclick]');
+    let found = false;
+    navItems.forEach(nav => {
+      const match = nav.getAttribute('onclick').match(/showSection\('([^']+)'\)/);
+      if (match && match[1] === saved) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        const el = document.getElementById('section-' + saved);
+        if (el) { el.classList.add('active'); found = true; }
+        nav.classList.add('active');
+      }
+    });
+    // Fallback to foundations if not found
+    if (!found) {
+      const el = document.getElementById('section-foundations');
+      if (el) el.classList.add('active');
+      const firstNav = document.querySelector('.nav-item[onclick]');
+      if (firstNav) firstNav.classList.add('active');
+    }
+  }
+
+  // Toggle a checkbox and persist
   function toggle(el) {
     el.classList.toggle('checked');
+    saveState();
     updateProgress();
   }
 
+  // Show a section, persist which one is active
   function showSection(id) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     const el = document.getElementById('section-' + id);
     if (el) el.classList.add('active');
     event.currentTarget.classList.add('active');
+    try { localStorage.setItem(SECTION_KEY, id); } catch(e) {}
     updateProgress();
   }
 
@@ -1614,8 +1685,12 @@ customElements.<span class="fn">define</span>(<span class="str">'pdp-buy-section
     });
   }
 
-  // Init
-  updateProgress();
+  // Init — restore state before anything renders
+  document.addEventListener('DOMContentLoaded', () => {
+    restoreChecks();
+    restoreSection();
+    updateProgress();
+  });
 </script>
 
 </body>

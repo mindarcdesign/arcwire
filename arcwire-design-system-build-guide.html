@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArcWire Design System — Build Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0e0e10;
+    --surface: #17171a;
+    --surface2: #1e1e22;
+    --border: #2a2a30;
+    --accent: #7c6cfc;
+    --accent2: #46d9a0;
+    --warn: #f0a23c;
+    --text: #e8e8ed;
+    --muted: #7a7a8a;
+    --done: #2a3a2e;
+    --done-text: #46d9a0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .sidebar-logo h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+
+  .sidebar-logo span {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .progress-bar-wrap {
+    padding: 12px 20px;
+    margin-bottom: 8px;
+  }
+
+  .progress-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .nav-section {
+    padding: 4px 0;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 20px 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--text); border-left-color: var(--accent); background: rgba(124,108,252,0.08); }
+  .nav-item.complete { color: var(--done-text); }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .nav-item.complete .nav-dot { background: var(--accent2); }
+  .nav-item.active .nav-dot { background: var(--accent); }
+
+  .nav-count {
+    margin-left: auto;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+  }
+
+  /* MAIN */
+  .main {
+    padding: 40px 48px;
+    max-width: 920px;
+  }
+
+  .section-header {
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 600px;
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* CHECKLIST */
+  .checklist-group {
+    margin-bottom: 28px;
+  }
+
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .group-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .group-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .group-badge {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .check-item:hover { background: var(--surface2); border-color: var(--border); }
+  .check-item.checked { background: var(--done); border-color: rgba(70,217,160,0.15); }
+
+  .checkbox {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .check-item.checked .checkbox {
+    background: var(--accent2);
+    border-color: var(--accent2);
+  }
+
+  .checkbox-tick {
+    display: none;
+    color: #0e0e10;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .check-item.checked .checkbox-tick { display: block; }
+
+  .check-content { flex: 1; }
+
+  .check-title {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .check-item.checked .check-title {
+    color: var(--done-text);
+    text-decoration: line-through;
+    text-decoration-color: rgba(70,217,160,0.4);
+  }
+
+  .check-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .check-tags {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+
+  .tag-figma { color: #a78bfa; border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.08); }
+  .tag-code { color: #60a5fa; border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.08); }
+  .tag-exists { color: var(--accent2); border-color: rgba(70,217,160,0.3); background: rgba(70,217,160,0.08); }
+  .tag-critical { color: var(--warn); border-color: rgba(240,162,60,0.3); background: rgba(240,162,60,0.08); }
+  .tag-new { color: #f472b6; border-color: rgba(244,114,182,0.3); background: rgba(244,114,182,0.08); }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 12px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #a0aec0;
+    overflow-x: auto;
+    line-height: 1.7;
+    white-space: pre;
+  }
+
+  .code-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .fn { color: #82aaff; }
+  .num { color: #f78c6c; }
+  .prop { color: #89ddff; }
+
+  /* TABS PANEL */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* INFO CARD */
+  .info-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+
+  .info-card h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .info-card p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .info-card.warn { border-left: 3px solid var(--warn); }
+  .info-card.tip { border-left: 3px solid var(--accent2); }
+  .info-card.info { border-left: 3px solid var(--accent); }
+
+  /* PROPERTY TABLE */
+  .prop-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 12px 0;
+  }
+
+  .prop-table th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .prop-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(42,42,48,0.5);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .prop-table tr:last-child td { border-bottom: none; }
+
+  .bool-tag { color: var(--accent2); }
+  .variant-tag { color: #f472b6; }
+  .mode-tag { color: var(--accent); }
+
+  /* SECTION NAVIGATION */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 24px;
+    padding: 16px 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 28px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-num {
+    font-size: 22px;
+    font-weight: 300;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .stat-divider {
+    width: 1px;
+    background: var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>ArcWire</h1>
+      <span>Design System Build Guide</span>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span>Overall Progress</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <nav class="nav-section">
+      <div class="nav-label">Figma Build</div>
+      <div class="nav-item active" onclick="showSection('foundations')">
+        <span class="nav-dot"></span> Foundations <span class="nav-count" id="count-foundations">0/0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('global')">
+        <span class="nav-dot"></span> Global Components <span class="nav-count" id="count-global">0/0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('pdp')">
+        <span class="nav-dot"></span> PDP System <span class="nav-count" id="count-pdp">0/0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('plp')">
+        <span class="nav-dot"></span> PLP + Collection <span class="nav-count" id="count-plp">0/0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('cart')">
+        <span class="nav-dot"></span> Cart + Checkout <span class="nav-count" id="count-cart">0/0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('homepage')">
+        <span class="nav-dot"></span> Homepage Sections <span class="nav-count" id="count-homepage">0/0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('account')">
+        <span class="nav-dot"></span> Account Pages <span class="nav-count" id="count-account">0/0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('search')">
+        <span class="nav-dot"></span> Search <span class="nav-count" id="count-search">0/0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('modals')">
+        <span class="nav-dot"></span> Modals + Drawers <span class="nav-count" id="count-modals">0/0</span>
+      </div>
+    </nav>
+
+    <nav class="nav-section">
+      <div class="nav-label">Claude Code</div>
+      <div class="nav-item" onclick="showSection('claudecode')">
+        <span class="nav-dot"></span> Storybook Setup
+      </div>
+      <div class="nav-item" onclick="showSection('tokens')">
+        <span class="nav-dot"></span> Token Architecture
+      </div>
+      <div class="nav-item" onclick="showSection('components')">
+        <span class="nav-dot"></span> Component Templates
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- FOUNDATIONS -->
+    <section class="section active" id="section-foundations">
+      <div class="section-header">
+        <div class="section-tag">Step 01 — Figma</div>
+        <h2 class="section-title">Foundations & Token Architecture</h2>
+        <p class="section-desc">The base layer everything else inherits from. Must be completed before any components.</p>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat">
+          <span class="stat-num" id="total-items">0</span>
+          <span class="stat-label">Total items</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" id="completed-items">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" id="pct-items">0%</span>
+          <span class="stat-label">This section</span>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Colour Variables</span>
+          <div class="group-line"></div>
+          <span class="group-badge">Critical first</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Primitive colour palette</div>
+            <div class="check-desc">Raw colour values: Blue-100 through Blue-900, Neutral-50–950, brand primaries. No semantic meaning yet — just the raw scale.</div>
+            <div class="check-tags"><span class="tag tag-figma">Figma Vars</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Semantic colour tokens</div>
+            <div class="check-desc">bg/surface/border/text/interactive/feedback — mapped FROM primitives. These are what components consume. bg-primary, text-secondary, border-subtle, interactive-hover, etc.</div>
+            <div class="check-tags"><span class="tag tag-figma">Figma Vars</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Brand mode variables</div>
+            <div class="check-desc">Variable Modes: Minimal, Standard, Premium, Editorial, Wellness. Each mode remaps the semantic tokens without touching component structure. This is your "skin swap" system.</div>
+            <div class="check-tags"><span class="tag tag-figma">Variable Modes</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Light / Dark mode tokens</div>
+            <div class="check-desc">Secondary mode layer on top of brand modes. Dark mode remaps surface, bg, and border tokens.</div>
+            <div class="check-tags"><span class="tag tag-figma">Variable Modes</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Typography System</span>
+          <div class="group-line"></div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Type scale variables</div>
+            <div class="check-desc">font-size-xs through font-size-6xl as number variables. font-weight-regular/medium/semibold/bold. line-height-tight/normal/relaxed.</div>
+            <div class="check-tags"><span class="tag tag-figma">Figma Vars</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Typography style library</div>
+            <div class="check-desc">Text styles: Display/H1–H6/Body-lg/Body/Body-sm/Caption/Label/Overline/Price. Each published as a Text Style in the library, consuming the variables above.</div>
+            <div class="check-tags"><span class="tag tag-figma">Text Styles</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Font family variable modes</div>
+            <div class="check-desc">font-family-heading and font-family-body as string variables with brand modes (e.g. Minimal = Neue Haas; Editorial = Canela). Allows full typography skin swap.</div>
+            <div class="check-tags"><span class="tag tag-figma">Variable Modes</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Spacing, Radius & Effects</span>
+          <div class="group-line"></div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Spacing scale (4pt grid)</div>
+            <div class="check-desc">space-1 (4px) through space-20 (80px). Used in component padding/gap/margin as variables. Never hardcode px in components.</div>
+            <div class="check-tags"><span class="tag tag-figma">Figma Vars</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Border radius variables</div>
+            <div class="check-desc">radius-none/xs/sm/md/lg/xl/full. Mapped to a brand mode: Minimal = none, Soft/Wellness = lg-xl, Premium = sm.</div>
+            <div class="check-tags"><span class="tag tag-figma">Variable Modes</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Elevation / shadow styles</div>
+            <div class="check-desc">shadow-sm/md/lg/xl as Effect Styles. Used on cards, modals, dropdowns.</div>
+            <div class="check-tags"><span class="tag tag-figma">Effect Styles</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Motion scale variables</div>
+            <div class="check-desc">duration-fast/base/slow. easing-standard/enter/exit. Not natively used in Figma but documented as variables for dev handover.</div>
+            <div class="check-tags"><span class="tag tag-figma">Figma Vars</span><span class="tag tag-code">Dev Handover</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Figma File Architecture</span>
+          <div class="group-line"></div>
+          <span class="group-badge">Structure</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">StyleGuide page — complete</div>
+            <div class="check-desc">Colour swatches, type ramp, spacing scale, radius/elevation reference all visible on this page. Acts as the system reference for any designer onboarding.</div>
+            <div class="check-tags"><span class="tag tag-figma">Figma Page</span><span class="tag tag-exists">Exists</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Component Intake page — structured</div>
+            <div class="check-desc">Each component entry should document: Name / Category / Boolean props / Variant list / Device variants / Status (WIP / Ready / Needs Review). Build a consistent frame template for this.</div>
+            <div class="check-tags"><span class="tag tag-figma">Figma Page</span><span class="tag tag-exists">Exists — Expand</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Document Components page — annotation system</div>
+            <div class="check-desc">Add a consistent annotation component: property callouts, boolean toggles shown visually, variant map diagram. Currently exists — ensure it's templated, not ad hoc.</div>
+            <div class="check-tags"><span class="tag tag-figma">Figma Page</span><span class="tag tag-exists">Exists — Improve</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Missing pages to create</div>
+            <div class="check-desc">Add: "PLP + Collection", "PDP Layout", "Cart + Mini Cart", "Search + Results", "Account", "Homepage Sections", "Modals + Drawers", "Form Elements", "Empty States + Error States"</div>
+            <div class="check-tags"><span class="tag tag-new">New Pages</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GLOBAL COMPONENTS -->
+    <section class="section" id="section-global">
+      <div class="section-header">
+        <div class="section-tag">Step 02 — Figma</div>
+        <h2 class="section-title">Global Components</h2>
+        <p class="section-desc">Components that appear across every page. Already have Navigation, MegaMenu, Footer started.</p>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Navigation — Expand Current</span>
+          <div class="group-line"></div>
+          <span class="group-badge">Exists</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Nav variants: Simple / Standard / Rich</div>
+            <div class="check-desc">Simple = logo + links + icons. Standard = with sub-nav categories. Rich = full mega menu trigger. All as variants of one Nav component.</div>
+            <div class="check-tags"><span class="tag tag-figma">Variants</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Nav booleans: Search visible / Account visible / Wishlist visible / Cart visible / Promo bar visible</div>
+            <div class="check-desc">Each icon/element should be a boolean so the nav can be configured per client without rebuilding.</div>
+            <div class="check-tags"><span class="tag tag-figma">Boolean Props</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Sticky promo/announcement bar</div>
+            <div class="check-desc">Separate component. Booleans: dismissible, countdown timer visible, link visible. Variants: single message / carousel.</div>
+            <div class="check-tags"><span class="tag tag-new">New Component</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Mobile nav drawer</div>
+            <div class="check-desc">Full-height drawer with nested category accordion, account links, search bar at top. Should be a separate component that slots into the nav at mobile breakpoint.</div>
+            <div class="check-tags"><span class="tag tag-new">New Component</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Footer — Expand Current</span>
+          <div class="group-line"></div>
+          <span class="group-badge">Exists</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Footer variants: Minimal / Standard / Rich</div>
+            <div class="check-desc">Minimal = logo + links + copyright. Standard = 4-column link grid. Rich = adds newsletter, social icons, trust badges.</div>
+            <div class="check-tags"><span class="tag tag-figma">Variants</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Footer booleans: Newsletter / Social / Payment icons / Trust badges / App store badges</div>
+            <div class="check-tags"><span class="tag tag-figma">Boolean Props</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Form Elements — Complete Library</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Input field component</div>
+            <div class="check-desc">States: Default / Focused / Filled / Error / Disabled. Props: label visible, helper text visible, icon-left, icon-right, char count.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Button component — full set</div>
+            <div class="check-desc">Variants: Primary/Secondary/Ghost/Danger/Link. Sizes: sm/md/lg. States: Default/Hover/Loading/Disabled. Booleans: icon-left, icon-right, full-width.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Radio / Checkbox / Toggle / Select / Textarea</div>
+            <div class="check-desc">All with Default/Checked/Error/Disabled states. Select with open/closed variants.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Badge / Tag / Pill components</div>
+            <div class="check-desc">Used for: sale badges, stock status, category tags, filter chips. Variants: colour-coded. Booleans: dismissible, icon-left.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Alert / Toast / Inline error components</div>
+            <div class="check-desc">Variants: success/error/warning/info. Toast vs inline alert vs banner. Boolean: dismissible, icon visible.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PDP SYSTEM -->
+    <section class="section" id="section-pdp">
+      <div class="section-header">
+        <div class="section-tag">Step 03 — Figma</div>
+        <h2 class="section-title">PDP System</h2>
+        <p class="section-desc">PDP Buy Section is already well-built. Expand to the full PDP layout system.</p>
+      </div>
+
+      <div class="info-card tip">
+        <h4>✅ PDP Buy Section — current property map</h4>
+        <p>Your existing component already controls: Breadcrumbs, Eye Brow, Wishlist, Swatches, Size, Subscribe, BNPL, USPS, Description. This is the right approach — extend it, don't rebuild it.</p>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">PDP Buy Section — Extend Current</span>
+          <div class="group-line"></div>
+          <span class="group-badge">Exists — Extend</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Add missing booleans</div>
+            <div class="check-desc">Add: Reviews visible, Urgency block (low stock / countdown), Cross-sell/upsell slot, Gifting options, Compare button, Notify me (OOS state), Social share.</div>
+            <div class="check-tags"><span class="tag tag-figma">Boolean Props</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">PDP layout variants</div>
+            <div class="check-desc">Variant: Media-left (standard) / Media-right / Media-top (editorial full-bleed) / Sticky buy box. These are structural layout variants, not style changes.</div>
+            <div class="check-tags"><span class="tag tag-figma">Variants</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Subscription variant</div>
+            <div class="check-desc">Already started. Ensure: frequency selector, savings badge, one-time vs subscribe toggle are all properly structured as nested subcomponents.</div>
+            <div class="check-tags"><span class="tag tag-figma">Variants</span><span class="tag tag-exists">In Progress</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Bundle PDP variant</div>
+            <div class="check-desc">Product bundle selector with component slots: individual product thumbnails, quantity selectors per item, bundle price summary, bundle CTA.</div>
+            <div class="check-tags"><span class="tag tag-new">New Variant</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">PDP Media Gallery</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New Component</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Media gallery component</div>
+            <div class="check-desc">Variants: Thumbnails-left / Thumbnails-bottom / Full-bleed carousel / Grid. Booleans: video thumbnail visible, zoom visible, 360 badge, AR badge.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Mobile gallery component</div>
+            <div class="check-desc">Swipeable carousel with dot/thumbnail indicator. Booleans: sticky top on scroll, image counter visible.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">PDP Below-the-fold Sections</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Reviews section</div>
+            <div class="check-desc">Star rating summary, rating histogram, review cards. Booleans: photos visible, verified badge, sort/filter controls.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Cross-sell / Related products section</div>
+            <div class="check-desc">Reuses Product Card components. Variants: Frequently Bought Together / You May Also Like / Complete the Look / Recently Viewed.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Size guide modal content</div>
+            <div class="check-desc">Measurement table, fit guide, how-to-measure illustration slot. Used as modal content — link from size selector.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLP -->
+    <section class="section" id="section-plp">
+      <div class="section-header">
+        <div class="section-tag">Step 04 — Figma</div>
+        <h2 class="section-title">PLP + Collection Pages</h2>
+        <p class="section-desc">Product listing pages — your Product Cards component already exists, build the full PLP layout system around it.</p>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Product Card — Extend Existing</span>
+          <div class="group-line"></div>
+          <span class="group-badge">Exists</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Card tiers: Simple / Standard / Premium (already built)</div>
+            <div class="check-desc">Confirm all tiers have consistent boolean props: Wishlist, Quick Add, Badge, Secondary image on hover, Star rating, Review count, Colour swatches, Compare.</div>
+            <div class="check-tags"><span class="tag tag-exists">Verify existing</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Card states: Default / Hovered / OOS / Loading skeleton</div>
+            <div class="check-desc">Skeleton loading state is critical for perceived performance on collection pages.</div>
+            <div class="check-tags"><span class="tag tag-new">Add States</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Filter System</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New Component</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Filter sidebar component</div>
+            <div class="check-desc">Variant: Left rail / Top bar / Drawer (mobile). Subcomponents: Filter accordion group, Colour swatch filter, Size filter, Price range slider, Rating filter. Boolean: sticky on scroll.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Applied filters / chips bar</div>
+            <div class="check-desc">Horizontal strip showing active filters as dismissible chips. Includes "Clear all" action. Boolean: result count visible.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Sort dropdown component</div>
+            <div class="check-desc">Sort by: Relevance / Price / Newest / Top Rated. Variant: Dropdown / Segmented control. Includes result count label.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Collection Page Layout</span>
+          <div class="group-line"></div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Collection hero / banner</div>
+            <div class="check-desc">Top of collection page. Variants: Text only / Image + text / Full-bleed image. Booleans: breadcrumbs, description visible, subcategory tiles.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Product grid layout</div>
+            <div class="check-desc">Variants: 2-col / 3-col / 4-col / List view. Booleans: grid density toggle visible (let user change column count). Includes promotional card slot (e.g. every 8th card = promo tile).</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Pagination / Load more</div>
+            <div class="check-desc">Variants: Numbered pagination / Load more button / Infinite scroll indicator. Booleans: result count, page indicator.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CART -->
+    <section class="section" id="section-cart">
+      <div class="section-header">
+        <div class="section-tag">Step 05 — Figma</div>
+        <h2 class="section-title">Cart + Checkout</h2>
+        <p class="section-desc">Three surfaces: Mini cart drawer, full Cart page, Checkout flow.</p>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Mini Cart Drawer</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Cart drawer component</div>
+            <div class="check-desc">Right-side drawer. Contains: Cart line item component (qty controls, remove, variant label), order summary, CTA. Booleans: upsell block visible, free shipping progress bar, promo code input, gift message.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Cart line item subcomponent</div>
+            <div class="check-desc">States: Default / Updating / OOS. Shows: thumbnail, product name, variant, qty stepper, price, remove.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Empty cart state</div>
+            <div class="check-desc">Illustration slot + CTA to continue shopping. Variant: with recommended products / without.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Full Cart Page</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Cart page layout</div>
+            <div class="check-desc">2-column: item list + order summary sidebar. Reuses Cart line item component. Booleans: cross-sell section, trust badges, BNPL options, gift options, notes field.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Checkout Flow</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New</span>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Checkout page layouts</div>
+            <div class="check-desc">3 steps: Contact/Shipping / Payment / Confirmation. Note: Shopify's native checkout has limited customisation — design the custom checkout extension areas only. Booleans: express payment (Shop Pay/Apple Pay), order bump.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-warn">Note: Shopify limits</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOMEPAGE -->
+    <section class="section" id="section-homepage">
+      <div class="section-header">
+        <div class="section-tag">Step 06 — Figma</div>
+        <h2 class="section-title">Homepage Sections</h2>
+        <p class="section-desc">Hero Banners already exist — build a full section library so any homepage can be assembled from the system.</p>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Hero / Banner — Extend Existing</span>
+          <div class="group-line"></div>
+          <span class="group-badge">Exists</span>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Hero tiers: Simple / Standard / Premium + booleans</div>
+            <div class="check-desc">Confirm all tiers have consistent booleans: CTA 1 & 2 visible, eyebrow text, countdown timer, video background, overlay opacity variable, content position (left/center/right).</div>
+            <div class="check-tags"><span class="tag tag-exists">Verify + Extend</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Split hero (50/50)</div>
+            <div class="check-desc">Image | Content or Content | Image. Boolean: image side left/right. Variant: image fills / padded image.</div>
+            <div class="check-tags"><span class="tag tag-new">Add Variant</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">New Homepage Section Components</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New</span>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Category tiles / featured collections</div>
+            <div class="check-desc">Variants: 2-up / 3-up / 4-up / mixed layout. Booleans: label overlay, hover effect, rounded images.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Featured product / editorial module</div>
+            <div class="check-desc">Large-format product feature. Booleans: product card overlaid, CTA, lifestyle image slot. Variant: image-left / image-right / full-bleed.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Social proof / trust bar</div>
+            <div class="check-desc">Horizontal strip: review count, star rating, press logos, certifications. Variants: icon-based / logo strip / stats.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Testimonials / reviews block</div>
+            <div class="check-desc">Variants: carousel / grid / single featured. Boolean: star rating visible, customer photo, verified badge.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">USP / feature strip</div>
+            <div class="check-desc">3–4 icon + text USP items. Variants: horizontal strip / card grid. Boolean: background fill, icon style (outline/filled/custom).</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Email capture / newsletter section</div>
+            <div class="check-desc">Variants: Full-width banner / inline strip / popup trigger. Booleans: image/background, incentive text (10% off), social proof.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Brand story / about section</div>
+            <div class="check-desc">Image + rich text. Variants: image-left / image-right / background image. Boolean: CTA link, video play trigger.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACCOUNT -->
+    <section class="section" id="section-account">
+      <div class="section-header">
+        <div class="section-tag">Step 07 — Figma</div>
+        <h2 class="section-title">Account Pages</h2>
+        <p class="section-desc">Customer account portal — often underdesigned in ecommerce systems. Shopify's new customer accounts use a different architecture.</p>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Account Portal</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New</span>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Account dashboard / overview</div>
+            <div class="check-desc">Welcome state, recent orders preview, quick links to addresses/wishlist. Booleans: loyalty points visible, subscription status.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Order history + order detail</div>
+            <div class="check-desc">Order list with status badges. Order detail: line items, tracking, return/exchange CTA. Booleans: tracking widget, reorder button.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Subscription management</div>
+            <div class="check-desc">List of active subscriptions, frequency selector, skip/pause/cancel actions. Critical for DTC brands.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-critical">High value</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Wishlist page</div>
+            <div class="check-desc">Grid of saved products using Product Card component. Booleans: share wishlist, move to cart, stock alerts.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Login / Register / Reset password pages</div>
+            <div class="check-desc">Simple form pages. Variants: modal overlay / full page / split-screen with brand image.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEARCH -->
+    <section class="section" id="section-search">
+      <div class="section-header">
+        <div class="section-tag">Step 08 — Figma</div>
+        <h2 class="section-title">Search</h2>
+        <p class="section-desc">Search is one of the highest-converting experiences on any ecommerce site — deserves its own component system.</p>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Search Components</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New</span>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Search bar component</div>
+            <div class="check-desc">States: Collapsed (icon) / Expanded / Active (typing) / Loading. Variants: inline in nav / full-width overlay.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Predictive search / autocomplete dropdown</div>
+            <div class="check-desc">Shows: product results (thumbnail + name + price), collection links, page links, recent searches, trending searches. Booleans: each section visible.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Search results page</div>
+            <div class="check-desc">Reuses PLP filter + grid system. Variant: results found / no results (with suggestions). Boolean: did-you-mean suggestion, refine search bar at top.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODALS -->
+    <section class="section" id="section-modals">
+      <div class="section-header">
+        <div class="section-tag">Step 09 — Figma</div>
+        <h2 class="section-title">Modals, Drawers + Overlays</h2>
+        <p class="section-desc">The container layer that wraps content across many surfaces. Build shells, not just instances.</p>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Overlay System</span>
+          <div class="group-line"></div>
+          <span class="group-badge">New</span>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Modal shell component</div>
+            <div class="check-desc">Sizes: sm/md/lg/xl/full. Booleans: header visible, footer visible, close button, backdrop dismissible. Content area is a slot — modal shell is reused across size guide, quick view, login, etc.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span><span class="tag tag-critical">Critical</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Drawer shell component</div>
+            <div class="check-desc">Sides: left / right / bottom. Sizes: narrow/standard/wide. Reused for: mini cart, mobile nav, filter drawer, quick view mobile.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Quick view modal content</div>
+            <div class="check-desc">Stripped PDP Buy Section inside a modal. Reuses the existing PDP Buy Section component — just adjust booleans to hide less critical fields.</div>
+            <div class="check-tags"><span class="tag tag-new">New — reuses PDP</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Popover / tooltip components</div>
+            <div class="check-desc">Used for: BNPL info, size guide callouts, feature explanations. Positions: top/bottom/left/right. Boolean: arrow visible.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">Cookie / GDPR consent bar</div>
+            <div class="check-desc">Variants: bottom bar / bottom-left card / center modal. Booleans: granular controls, decline button.</div>
+            <div class="check-tags"><span class="tag tag-new">New</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLAUDE CODE -->
+    <section class="section" id="section-claudecode">
+      <div class="section-header">
+        <div class="section-tag">Claude Code — Setup</div>
+        <h2 class="section-title">Storybook Component Setup</h2>
+        <p class="section-desc">How to use Claude Code to scaffold component templates that mirror the Figma boolean/variant logic.</p>
+      </div>
+
+      <div class="info-card info">
+        <h4>How this mirrors Figma</h4>
+        <p>Every boolean prop in Figma becomes a boolean prop in code. Every variant becomes a string union type. Every mode becomes a CSS variable theme. The Figma logic IS the component API.</p>
+      </div>
+
+      <div class="checklist-group">
+        <div class="group-header">
+          <span class="group-title">Initial Claude Code Commands</span>
+          <div class="group-line"></div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">1. Init Storybook in repo</div>
+            <div class="check-desc">Run in Claude Code terminal to scaffold Storybook with the right config for a Shopify/Liquid + Web Components approach.</div>
+            <div class="code-label">Claude Code — terminal</div>
+            <div class="code-block"><span class="cm"># Run in your project root</span>
+npx storybook@latest init
+<span class="cm"># Select: HTML / Web Components / Vite</span>
+<span class="cm"># Then install token tooling:</span>
+npm install style-dictionary @tokens-studio/sd-transforms</div>
+          </div>
+        </div>
+
+        <div class="check-item" onclick="toggle(this)">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">2. Generate token files from Figma variables</div>
+            <div class="check-desc">Export from Figma using Tokens Studio plugin → JSON → run Style Dictionary to generate CSS custom properties.</div>
+            <div class="code-label">Claude Code prompt</div>
+            <div class="code-block"><span class="str">"Create a Style Dictionary config that:
+- Reads tokens/figma-export.json  
+- Outputs CSS variables for each brand mode
+  (minimal, standard, premium, editorial, wellness)
+- Outputs a tokens.ts type file
+- Nests output as: tokens/dist/[mode].css"</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOKENS -->
+    <section class="section" id="section-tokens">
+      <div class="section-header">
+        <div class="section-tag">Claude Code — Token Architecture</div>
+        <h2 class="section-title">Token Architecture in Code</h2>
+        <p class="section-desc">How the Figma variable modes map to CSS architecture.</p>
+      </div>
+
+      <div class="code-label">CSS Token Structure (mirrors Figma variable modes)</div>
+      <div class="code-block"><span class="cm">/* tokens/dist/base.css — primitives */</span>
+<span class="prop">:root</span> {
+  <span class="prop">--color-blue-500</span>: <span class="str">#3b82f6</span>;
+  <span class="prop">--color-neutral-50</span>: <span class="str">#fafafa</span>;
+  <span class="prop">--radius-sm</span>: <span class="str">4px</span>;
+  <span class="prop">--radius-md</span>: <span class="str">8px</span>;
+  <span class="prop">--space-4</span>: <span class="str">16px</span>;
+}
+
+<span class="cm">/* tokens/dist/minimal.css — brand mode */</span>
+[<span class="prop">data-theme</span>=<span class="str">"minimal"</span>] {
+  <span class="prop">--bg-primary</span>: <span class="str">#ffffff</span>;
+  <span class="prop">--text-primary</span>: <span class="str">#0a0a0a</span>;
+  <span class="prop">--radius-component</span>: <span class="str">0px</span>;
+  <span class="prop">--font-heading</span>: <span class="str">'Neue Haas Grotesk'</span>, sans-serif;
+}
+
+<span class="cm">/* tokens/dist/wellness.css — brand mode */</span>
+[<span class="prop">data-theme</span>=<span class="str">"wellness"</span>] {
+  <span class="prop">--bg-primary</span>: <span class="str">#f7f3ef</span>;
+  <span class="prop">--text-primary</span>: <span class="str">#2d2420</span>;
+  <span class="prop">--radius-component</span>: <span class="str">16px</span>;
+  <span class="prop">--font-heading</span>: <span class="str">'Canela'</span>, serif;
+}</div>
+    </section>
+
+    <!-- COMPONENTS -->
+    <section class="section" id="section-components">
+      <div class="section-header">
+        <div class="section-tag">Claude Code — Component Templates</div>
+        <h2 class="section-title">Component Templates</h2>
+        <p class="section-desc">The component prop API mirrors the Figma boolean/variant system exactly.</p>
+      </div>
+
+      <div class="info-card tip">
+        <h4>PDP Buy Section — props map to Figma booleans 1:1</h4>
+        <p>Your Figma Info Panel booleans (Breadcrumbs, Eye Brow, Wishlist, Swatches, Size, Subscribe, BNPL, USPS, Description) become the component props below.</p>
+      </div>
+
+      <div class="code-label">Claude Code prompt — PDP Buy Section component</div>
+      <div class="code-block"><span class="str">"Create a PDPBuySection web component with these props
+mirroring the Figma boolean system:
+
+Boolean props (all default true):
+- showBreadcrumbs, showEyebrow, showWishlist
+- showSwatches, showSize, showSubscribe
+- showBNLP, showUSPS, showDescription  
+- showReviews, showUrgency, showCrossSell
+
+Variant prop (string union):
+- layout: 'media-left' | 'media-right' | 'editorial' | 'sticky'
+
+Mode prop (maps to CSS theme):
+- theme: 'minimal' | 'standard' | 'premium' | 'editorial' | 'wellness'
+
+Output: 
+- pdp-buy-section.js (web component)
+- PDPBuySection.stories.js (Storybook story)
+- pdp-buy-section.css (consuming CSS vars)
+
+The Storybook story should show all boolean controls
+in the Storybook controls panel."</span></div>
+
+      <div class="code-label">Generated component structure (Claude Code output)</div>
+      <div class="code-block"><span class="kw">class</span> <span class="fn">PDPBuySection</span> <span class="kw">extends</span> HTMLElement {
+  <span class="kw">static</span> <span class="kw">get</span> <span class="fn">observedAttributes</span>() {
+    <span class="kw">return</span> [
+      <span class="str">'show-breadcrumbs'</span>, <span class="str">'show-eyebrow'</span>, <span class="str">'show-wishlist'</span>,
+      <span class="str">'show-swatches'</span>, <span class="str">'show-size'</span>, <span class="str">'show-subscribe'</span>,
+      <span class="str">'show-bnpl'</span>, <span class="str">'show-usps'</span>, <span class="str">'show-description'</span>,
+      <span class="str">'show-reviews'</span>, <span class="str">'show-urgency'</span>, <span class="str">'layout'</span>, <span class="str">'theme'</span>
+    ];
+  }
+
+  <span class="fn">render</span>() {
+    <span class="kw">const</span> show = (attr) => <span class="kw">this</span>.getAttribute(attr) !== <span class="str">'false'</span>;
+    <span class="kw">this</span>.innerHTML = <span class="str">`
+      &lt;div class="pdp-buy" data-layout="${this.getAttribute('layout') || 'media-left'}"
+           data-theme="${this.getAttribute('theme') || 'standard'}"&gt;
+        ${show('show-breadcrumbs') ? '&lt;pdp-breadcrumbs/&gt;' : ''}
+        ${show('show-eyebrow') ? '&lt;p class="eyebrow"&gt;...&lt;/p&gt;' : ''}
+        ${show('show-wishlist') ? '&lt;wishlist-button/&gt;' : ''}
+        ${show('show-swatches') ? '&lt;colour-swatches/&gt;' : ''}
+        ${show('show-size') ? '&lt;size-selector/&gt;' : ''}
+        ${show('show-subscribe') ? '&lt;subscribe-section/&gt;' : ''}
+        ${show('show-bnpl') ? '&lt;bnpl-options/&gt;' : ''}
+      &lt;/div&gt;
+    `</span>;
+  }
+}
+
+customElements.<span class="fn">define</span>(<span class="str">'pdp-buy-section'</span>, PDPBuySection);</div>
+
+      <div class="code-label">Storybook story — mirrors Figma boolean panel</div>
+      <div class="code-block"><span class="kw">export default</span> {
+  title: <span class="str">'Commerce/PDP Buy Section'</span>,
+  component: <span class="str">'pdp-buy-section'</span>,
+  argTypes: {
+    layout: { 
+      control: <span class="str">'select'</span>, 
+      options: [<span class="str">'media-left'</span>, <span class="str">'media-right'</span>, <span class="str">'editorial'</span>, <span class="str">'sticky'</span>]
+    },
+    theme: { 
+      control: <span class="str">'select'</span>,
+      options: [<span class="str">'minimal'</span>, <span class="str">'standard'</span>, <span class="str">'premium'</span>, <span class="str">'editorial'</span>, <span class="str">'wellness'</span>]
+    },
+    showBreadcrumbs: { control: <span class="str">'boolean'</span> },
+    showWishlist:    { control: <span class="str">'boolean'</span> },
+    showSwatches:    { control: <span class="str">'boolean'</span> },
+    showSize:        { control: <span class="str">'boolean'</span> },
+    showSubscribe:   { control: <span class="str">'boolean'</span> },
+    showBNPL:        { control: <span class="str">'boolean'</span> },
+    showReviews:     { control: <span class="str">'boolean'</span> },
+    showUrgency:     { control: <span class="str">'boolean'</span> },
+  }
+};
+
+<span class="kw">export const</span> FullFeatured = { args: { layout: <span class="str">'media-left'</span>, theme: <span class="str">'standard'</span>, showBreadcrumbs: <span class="kw">true</span>, showSubscribe: <span class="kw">true</span> } };
+<span class="kw">export const</span> MinimalMode  = { args: { layout: <span class="str">'media-left'</span>, theme: <span class="str">'minimal'</span>, showSubscribe: <span class="kw">false</span>, showReviews: <span class="kw">false</span> } };
+<span class="kw">export const</span> WellnessMode = { args: { layout: <span class="str">'media-right'</span>, theme: <span class="str">'wellness'</span>, showSubscribe: <span class="kw">true</span> } };</div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Track all checkboxes
+  function toggle(el) {
+    el.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const el = document.getElementById('section-' + id);
+    if (el) el.classList.add('active');
+    event.currentTarget.classList.add('active');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const all = document.querySelectorAll('.check-item');
+    const done = document.querySelectorAll('.check-item.checked');
+    const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
+
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('total-items').textContent = all.length;
+    document.getElementById('completed-items').textContent = done.length;
+    document.getElementById('pct-items').textContent = pct + '%';
+
+    // Update section counts in sidebar
+    const sections = ['foundations', 'global', 'pdp', 'plp', 'cart', 'homepage', 'account', 'search', 'modals'];
+    sections.forEach(sec => {
+      const sectionEl = document.getElementById('section-' + sec);
+      if (!sectionEl) return;
+      const secAll = sectionEl.querySelectorAll('.check-item').length;
+      const secDone = sectionEl.querySelectorAll('.check-item.checked').length;
+      const countEl = document.getElementById('count-' + sec);
+      if (countEl) countEl.textContent = secDone + '/' + secAll;
+    });
+  }
+
+  // Init
+  updateProgress();
+</script>
+
+</body>
+</html>
